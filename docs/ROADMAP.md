@@ -13,7 +13,7 @@
 - [x] Post-deployment Pages smoke test for the application shell, runtime assets, QC1 fixture, and browser harness.
 - [x] Local-first disclosure, no remote services, no dependency installation.
 - [x] Dependency-free browser smoke-test harness for approval, output consistency, ZIP contents, timing, checksums, and edit invalidation.
-- [ ] Enable GitHub Pages for Actions in repository settings and confirm the published URL from the post-deploy smoke test.
+- [ ] Enable the repository's Pages site at **Settings → Pages → Build and deployment → Source: GitHub Actions**, then rerun the workflow from `main`. Recent runs receive `HttpError: Not Found` from `configure-pages` because no Pages site exists; `GITHUB_TOKEN` cannot create it. The workflow now smoke-tests the assembled static site before this step and checks the live URL after deployment.
 - [ ] Open the QC1 `.pptx` in desktop PowerPoint and visually inspect representative slides, notes, typography, and long-content autofit.
 - [ ] Validate in the target enterprise browser before demonstration.
 - [ ] Optional file download checksums / package extraction verification in target browsers.

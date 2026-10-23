@@ -23,9 +23,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Configure Pages
-        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
-
       - name: Assemble static site
         run: |
           mkdir -p _site/docs _site/schema _site/examples _site/tests _site/presentation
@@ -35,6 +32,12 @@ jobs:
           cp -R examples/. _site/examples/
           cp -R tests/. _site/tests/
           cp presentation/theme-profile.json _site/presentation/
+
+      - name: Verify assembled static site
+        run: bash tests/deployment-smoke.sh _site
+
+      - name: Configure Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1

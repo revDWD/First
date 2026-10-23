@@ -74,10 +74,10 @@ The smoke harness covers sparse intake, guided flow, malicious source instructio
 
 ## GitHub Pages and release handling
 
-- The intended public URL is `https://gitddyck.github.io/First/`.
+- The expected Pages URL is `https://revdwd.github.io/First/`; the repository's configured `gitDdyck/First` remote redirects to the current canonical `revDWD/First` repository. The site currently returns GitHub Pages' 404 because Pages is not enabled.
 - Deployment runs on pushes to `main` and manual workflow dispatch. The workflow publishes the static app, docs, schema, demo, and smoke harness.
 - Official GitHub Actions used by Pages are pinned to full commit SHAs with version comments. Do not replace these with floating tags without review.
-- If Pages is not enabled, set repository **Settings → Pages → Build and deployment → Source** to **GitHub Actions** and run the workflow.
+- The workflow verifies the assembled site before calling `configure-pages`, then checks the deployed URL after deployment. If Pages is not enabled, a repository administrator must set **Settings → Pages → Build and deployment → Source** to **GitHub Actions** and rerun the workflow. `GITHUB_TOKEN` cannot enable Pages; do not add a privileged personal token for this purpose.
 - A green deploy workflow does not constitute product/security approval. Do not publish user project data; Pages content is public.
 - Do not push, publish a release, or change repository settings unless the user requests that action.
 

@@ -2,7 +2,7 @@
 
 ## Reference analysis
 
-The four user-provided decks are local design references only. They are not copied into the repository, published, or bundled with generated presentations.
+The four user-provided decks are local design references only. They are not copied into the repository, published, or bundled with generated presentations. Their binaries are not present in this checkout, so the summary below reflects the existing reference notes and theme profile and has not been independently revalidated against the source files in this session.
 
 | Reference | Observed design contribution |
 |---|---|

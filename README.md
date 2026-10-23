@@ -2,9 +2,11 @@
 
 A local-first, dependency-free prototype for turning an early digital project idea into a governed, reviewable pitch package. The prototype uses deterministic templates; it does not call an AI model, external search, MCP server, image generator, or video service.
 
-**Live demo:** [Open Digital Project Pitch Studio on GitHub Pages](https://gitddyck.github.io/First/)
+**GitHub Pages demo:** [Open Digital Project Pitch Studio](https://revdwd.github.io/First/) (currently unavailable until Pages is enabled for this repository)
 
-The repository is configured to publish the static app with GitHub Actions. GitHub Pages must be enabled by a repository administrator at **Settings → Pages → Build and deployment → Source: GitHub Actions**; the workflow cannot enable this repository setting itself. The earlier Pages run failed before uploading a site because the Pages configuration API was unavailable to the workflow. The workflow now requests the read-only Pages permission and runs a post-deployment URL smoke test. If the link is still unavailable, an administrator must enable Pages and rerun **Deploy GitHub Pages** from `main`. The expected URL is `https://gitddyck.github.io/First/`.
+The app is suitable for GitHub Pages as a static, local-first demonstration. It has no server-side processes, secrets, persistent shared storage, MCP connections, or render services; those connected capabilities are not implemented and must not be represented as available. The deployed prototype keeps project data in the visitor's browser and should not be used for confidential or restricted data.
+
+The current link was checked and returns GitHub Pages' 404 page. The GitHub Actions API identifies the repository's current canonical owner as `revDWD` (the repository's configured `gitDdyck/First` remote redirects), so the expected site URL uses `revdwd.github.io`. Both recent Actions runs fail in **Configure Pages**, before deployment, with `HttpError: Not Found` for the Pages site endpoint. This means the repository does not yet have a Pages site enabled; it is not an asset-path or application-build failure. A repository administrator must set **Settings → Pages → Build and deployment → Source: GitHub Actions**, then rerun **Deploy GitHub Pages** from `main`. The workflow's `GITHUB_TOKEN` cannot enable Pages; the action's enablement option requires a separate privileged token, which this project intentionally does not add. Once enabled, the workflow validates the assembled site, deploys it, and checks the actual deployment URL and its assets.
 
 ## Run locally (Windows)
 
@@ -57,4 +59,4 @@ Do not deploy this static prototype as an enterprise service or use it with sens
 
 ## Validation
 
-The repository has no build dependencies or package-based test runner. Run the prototype in a modern browser and exercise the QC1 end-to-end path. Confirm approval gating, re-approval on edits, evidence provenance, asset previews, consistency audit, and ZIP extraction before use. The browser smoke-test harness automates the key local workflow and should pass before merging.
+The repository has no build dependencies or package-based test runner. Run the prototype in a modern browser and exercise the QC1 end-to-end path. Confirm approval gating, re-approval on edits, evidence provenance, asset previews, consistency audit, and ZIP extraction before use. The dependency-free browser harness covers the local workflow; the Pages workflow checks the assembled static site before deployment and checks the live URL after deployment.
