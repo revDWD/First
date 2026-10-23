@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f4ef">
+    <meta name="description" content="A governed, local-first workspace for developing a reviewable project pitch.">
+    <title>Digital Project Pitch Studio</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="wordmark" href="#" aria-label="Pitch Studio home">
+          <span class="wordmark-icon" aria-hidden="true">P</span>
+          <span>Pitch Studio</span>
+        </a>
+        <div class="topbar-right">
+          <span class="privacy-label"><span class="privacy-dot"></span> Stored on this device</span>
+          <button class="text-button" id="reset-project" type="button">New project</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div>
+            <p class="eyebrow">DIGITAL PROJECT PITCH STUDIO</p>
+            <h1>Turn a promising idea into a pitch you can stand behind.</h1>
+            <p class="hero-copy">Build one source of truth, review every claim, then shape a coherent package for your sponsor.</p>
+          </div>
+          <div class="hero-side">
+            <span class="status-pill"><span class="status-dot"></span><span id="workflow-status">Idea not started</span></span>
+            <span class="version-label" id="version-label">Draft · v0.1</span>
+          </div>
+        </section>
+
+        <nav class="stepper" aria-label="Pitch workflow">
+          <button class="step active" data-stage="intake" type="button"><span class="step-number">01</span><span>Idea</span></button>
+          <span class="step-line"></span>
+          <button class="step" data-stage="evidence" type="button"><span class="step-number">02</span><span>Evidence</span></button>
+          <span class="step-line"></span>
+          <button class="step" data-stage="review" type="button"><span class="step-number">03</span><span>Review</span></button>
+          <span class="step-line"></span>
+          <button class="step" data-stage="assets" type="button"><span class="step-number">04</span><span>Pitch package</span></button>
+        </nav>
+
+        <section class="workspace">
+          <div class="workspace-main">
+            <section class="stage-panel active" id="stage-intake" aria-labelledby="intake-heading">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">STAGE 1 · IDEA INTAKE</p>
+                  <h2 id="intake-heading">Start with what you know.</h2>
+                  <p class="muted">A title and a sentence are enough to begin. You can leave anything else blank.</p>
+                </div>
+                <button class="secondary-button" id="load-demo" type="button">Load QC1 demo</button>
+              </div>
+              <div class="mode-picker" role="group" aria-label="Intake mode">
+                <button class="mode-card selected" data-mode="quick" type="button">
+                  <span class="mode-icon" aria-hidden="true">✳</span><span class="mode-title">Quick idea</span><span class="mode-copy">Add a title and short concept.</span>
+                </button>
+                <button class="mode-card" data-mode="guided" type="button">
+                  <span class="mode-icon" aria-hidden="true">↗</span><span class="mode-title">Guided interview</span><span class="mode-copy">Work through one question at a time.</span>
+                </button>
+                <button class="mode-card" data-mode="evidence" type="button">
+                  <span class="mode-icon" aria-hidden="true">⌕</span><span class="mode-title">Evidence-assisted</span><span class="mode-copy">Add local documents for review.</span>
+                </button>
+              </div>
+              <form id="intake-form">
+                <div class="form-grid">
+                  <label class="field field-wide">Working project title<input id="working-title" name="working_title" maxlength="120" placeholder="e.g. Connected instrument data pilot"></label>
+                  <label class="field field-wide">One-sentence idea<textarea id="idea-summary" name="idea_summary" rows="3" maxlength="1200" placeholder="What might change, for whom, and why?"></textarea></label>
+                  <label class="field field-wide">Problem or opportunity<textarea id="problem-statement" name="problem_statement" rows="3" maxlength="1200" placeholder="What is difficult today? What do you know versus still need to confirm?"></textarea></label>
+                  <label class="field">Current workflow<input id="current-state" name="current_state" maxlength="500" placeholder="How does the work happen today?"></label>
+                  <label class="field">Intended users<input id="target-users" name="target_users" maxlength="300" placeholder="Who would use or benefit?"></label>
+                  <label class="field">Known systems or instruments<input id="systems" name="systems" maxlength="400" placeholder="Applications, instruments, data sources"></label>
+                  <label class="field">Potential sponsor<input id="sponsor" name="sponsor" maxlength="200" placeholder="Optional"></label>
+                  <label class="field">Pitch audience<input id="audience" name="audience" maxlength="200" placeholder="e.g. Laboratory operations leaders"></label>
+                  <label class="field">Known constraints<input id="constraints" name="constraints" maxlength="500" placeholder="Time, access, policy, budget, or unknown"></label>
+                  <label class="field">Data sensitivity<select id="sensitivity" name="sensitivity"><option value="unspecified">Not specified</option><option value="public">Public</option><option value="internal">Internal</option><option value="confidential">Confidential</option><option value="restricted">Restricted / regulated</option></select></label>
+                  <label class="field">Tone and visual direction<input id="tone" name="tone" maxlength="200" placeholder="e.g. Clear, calm, evidence-led"></label>
+                </div>
+                <div id="guided-prompt" class="guided-prompt" hidden></div>
+                <div class="form-actions">
+                  <span class="form-note">Nothing is sent to a model or external service in this prototype.</span>
+                  <button class="primary-button" type="submit">Build my pitch model <span aria-hidden="true">→</span></button>
+                </div>
+              </form>
+            </section>
+
+            <section class="stage-panel" id="stage-evidence" aria-labelledby="evidence-heading">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">STAGE 2 · SOURCES &amp; EVIDENCE</p>
+                  <h2 id="evidence-heading">Keep evidence separate from the story.</h2>
+                  <p class="muted">Imported files stay in your browser. Select a passage and label it before it can support a claim.</p>
+                </div>
+                <span class="count-badge" id="evidence-count">0 items</span>
+              </div>
+              <div class="notice"><strong>Source boundary</strong><span>Only plain text, Markdown, and JSON files are supported. Content is treated as untrusted evidence, never as instructions.</span></div>
+              <div class="upload-row">
+                <label class="secondary-button file-button" for="evidence-file">Choose a local document</label>
+                <input id="evidence-file" type="file" accept=".txt,.md,.json,text/plain,application/json">
+                <span class="muted small" id="file-status">No document selected</span>
+              </div>
+              <form id="evidence-form" class="evidence-form" hidden>
+                <div class="form-grid">
+                  <label class="field">Source title<input id="source-title" maxlength="200" required></label>
+                  <label class="field">Publisher or owner<input id="source-owner" maxlength="200" placeholder="Optional"></label>
+                  <label class="field">Source reference<input id="source-reference" maxlength="500" placeholder="File name or approved internal reference"></label>
+                  <label class="field">Source type<select id="source-type"><option>Internal document</option><option>Official product documentation</option><option>Primary research or standard</option><option>Government or institution</option><option>Secondary source</option><option>Community / anecdotal</option><option>User assertion</option></select></label>
+                  <label class="field field-wide">Passage to consider<textarea id="source-passage" rows="5" maxlength="4000" required></textarea></label>
+                </div>
+                <div class="form-actions">
+                  <span class="form-note">Acceptance records your review; it does not independently verify a claim.</span>
+                  <div class="button-group"><button class="secondary-button" id="reject-evidence" type="button">Reject passage</button><button class="primary-button" type="submit">Accept as evidence</button></div>
+                </div>
+              </form>
+              <div id="evidence-list" class="evidence-list"></div>
+              <div class="panel-footer"><button class="secondary-button" data-go="review" type="button">Continue to model review <span aria-hidden="true">→</span></button></div>
+            </section>
+
+            <section class="stage-panel" id="stage-review" aria-labelledby="review-heading">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">STAGE 3 · HUMAN REVIEW GATE</p>
+                  <h2 id="review-heading">Review the source of truth.</h2>
+                  <p class="muted">Edit the framing and proposed next step. Unknowns stay visible. Approval is required before assets can be generated.</p>
+                </div>
+                <span class="approval-badge" id="approval-badge">Not approved</span>
+              </div>
+              <div class="legend"><span class="tag tag-assertion">USER ASSERTION</span><span class="tag tag-unknown">UNKNOWN</span><span class="tag tag-recommendation">RECOMMENDATION</span><span class="tag tag-evidence">SOURCE-REVIEWED</span></div>
+              <form id="model-form">
+                <div class="form-grid">
+                  <label class="field field-wide">Project name<input id="model-title" maxlength="120" required></label>
+                  <label class="field field-wide">Problem statement<textarea id="model-problem" rows="3" maxlength="1200" required></textarea></label>
+                  <label class="field field-wide">Current state<textarea id="model-current" rows="2" maxlength="1000"></textarea></label>
+                  <label class="field field-wide">Proposed future state<textarea id="model-future" rows="2" maxlength="1000"></textarea></label>
+                  <label class="field field-wide">Value proposition<textarea id="model-value" rows="2" maxlength="800"></textarea></label>
+                  <label class="field">Recommended next step<textarea id="model-next-step" rows="3" maxlength="800" required></textarea></label>
+                  <label class="field">Pilot definition<textarea id="model-pilot" rows="3" maxlength="800"></textarea></label>
+                  <label class="field">Success measures to explore<textarea id="model-measures" rows="3" maxlength="600"></textarea></label>
+                  <label class="field">Open questions<textarea id="model-unknowns" rows="3" maxlength="1000"></textarea></label>
+                  <label class="field">Tagline<input id="model-tagline" maxlength="120"></label>
+                  <label class="field">Audience<input id="model-audience" maxlength="200"></label>
+                </div>
+                <div class="review-block">
+                  <h3>What is and isn't established</h3>
+                  <div id="claim-review"></div>
+                </div>
+                <div class="form-actions">
+                  <button class="text-button" id="mark-value-unknown" type="button">Mark value proposition unknown</button>
+                  <button class="primary-button" type="submit">Approve this version <span aria-hidden="true">✓</span></button>
+                </div>
+              </form>
+              <div class="notice warning"><strong>Proposal, not authorization</strong><span>Approval here means you approve this pitch draft for asset generation. It does not approve, fund, validate, or authorize the project.</span></div>
+            </section>
+
+            <section class="stage-panel" id="stage-assets" aria-labelledby="assets-heading">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">STAGE 4 · GENERATE &amp; EXPORT</p>
+                  <h2 id="assets-heading">One approved model. A coordinated package.</h2>
+                  <p class="muted">Every deliverable is rendered deterministically from the same approved version.</p>
+                </div>
+                <button class="primary-button" id="generate-assets" type="button">Generate pitch package <span aria-hidden="true">✳</span></button>
+              </div>
+              <div id="approval-required" class="notice warning"><strong>Approval required</strong><span>Review and approve the canonical model before generating final assets.</span></div>
+              <div id="asset-grid" class="asset-grid"></div>
+              <div id="audit-result" class="audit-result" hidden></div>
+              <div class="export-bar" id="export-bar" hidden>
+                <div><strong>Ready for your review</strong><span class="muted">Assets are a draft package; check citations and limitations before sharing.</span></div>
+                <button class="primary-button" id="export-package" type="button">Download ZIP package <span aria-hidden="true">↓</span></button>
+              </div>
+            </section>
+          </div>
+          <aside class="inspector">
+            <p class="eyebrow">PROJECT INSPECTOR</p>
+            <h3 id="inspector-title">Untitled project</h3>
+            <p class="muted" id="inspector-summary">Your approved facts and decisions will anchor every deliverable.</p>
+            <div class="inspector-divider"></div>
+            <div class="inspector-row"><span>Model version</span><strong id="inspector-version">v0.1</strong></div>
+            <div class="inspector-row"><span>Evidence items</span><strong id="inspector-evidence">0</strong></div>
+            <div class="inspector-row"><span>Review gate</span><strong id="inspector-approval">Pending</strong></div>
+            <div class="inspector-row"><span>Sensitivity</span><strong id="inspector-sensitivity">Unspecified</strong></div>
+            <div class="inspector-divider"></div>
+            <div class="safety-note"><span aria-hidden="true">◉</span><p><strong>Local-first by design</strong>Your working data stays in this browser's local storage. Avoid entering confidential or regulated data in this demonstration.</p></div>
+            <button class="text-button full-width" id="clear-local-data" type="button">Clear this device's project data</button>
+          </aside>
+        </section>
+        <footer class="page-footer"><span>Pitch Studio prototype · deterministic templates · no external AI or MCP connection</span><a href="README.md">Local setup &amp; governance</a></footer>
+      </main>
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

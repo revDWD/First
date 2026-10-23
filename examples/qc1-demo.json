@@ -1,0 +1,123 @@
+{
+  "project_id": "qc1-connected-instrument-pilot",
+  "version": "0.1",
+  "working_title": "QC1 Connected Instrument Pilot",
+  "sponsor": "",
+  "audience": "Laboratory operations and digital project sponsors",
+  "data_classification": "unspecified",
+  "constraints": [
+    "Confirm instrument interface, data path, quality requirements, access, and validation expectations before pilot selection."
+  ],
+  "tagline": "Test one instrument. Trace one data path.",
+  "idea_summary": "Explore connecting one laboratory instrument to the electronic recording environment to test an end-to-end data path for a QC1 characterization workflow.",
+  "problem_statement": "Instrument results may require manual saving, moving, scanning, transcription, or review. Which steps occur in the target workflow and what controls apply still need confirmation.",
+  "current_state": {
+    "actors": ["Laboratory scientist", "QC1 reviewer"],
+    "steps": ["Instrument result is produced", "Manual handling may occur before electronic recording or review"],
+    "systems": ["One laboratory instrument (specific model unknown)", "Electronic recording environment (unspecified)"],
+    "pain_points": ["Manual handling may occur; the target workflow and extent require confirmation"],
+    "evidence_ids": []
+  },
+  "future_state": {
+    "actors": ["Laboratory scientist", "QC1 reviewer"],
+    "steps": ["Capture one instrument result", "Trace the result through one controlled end-to-end data path", "Review the resulting workflow with relevant stakeholders"],
+    "systems": ["One selected instrument", "Electronic recording environment (integration not established)"],
+    "changes": ["Evaluate a bounded connection rather than assume an integration exists"],
+    "evidence_ids": []
+  },
+  "target_users": ["Laboratory scientists", "QC1 reviewers"],
+  "stakeholders": ["Laboratory operations", "Quality", "IT and data governance", "Potential project sponsor"],
+  "value_proposition": "A small, instrument-specific pilot could help stakeholders assess a proposed electronic data path before making a broader commitment.",
+  "benefits": [
+    {
+      "statement": "The pilot could provide evidence about workflow fit, data traceability, and review needs.",
+      "classification": "hypothesis",
+      "evidence_ids": [],
+      "confidence": "To be tested"
+    }
+  ],
+  "success_measures": [
+    {
+      "measure": "End-to-end data path can be demonstrated for the selected workflow",
+      "unit": "observed outcome",
+      "basis": "Proposed pilot criterion; threshold to be agreed",
+      "classification": "recommendation"
+    },
+    {
+      "measure": "Relevant quality, security, and data-governance questions are documented",
+      "unit": "review record",
+      "basis": "Proposed pilot criterion; owners to be agreed",
+      "classification": "recommendation"
+    }
+  ],
+  "scope": {
+    "in_scope": ["Select one instrument", "Select one QC1 characterization workflow", "Test one end-to-end data path"],
+    "out_of_scope": ["Assuming an existing integration", "Selecting a product or vendor", "Claiming validated or production-ready status", "Estimating savings or committing funding"]
+  },
+  "dependencies": [
+    "Instrument interface and access need assessment",
+    "Electronic-recording environment capabilities need confirmation",
+    "Quality, security, privacy, and data-governance review needs identification"
+  ],
+  "risks": [
+    {
+      "statement": "The required instrument interface or data path may not be available",
+      "classification": "unknown",
+      "mitigation": "Confirm interface and access with system owners before pilot commitment"
+    },
+    {
+      "statement": "Quality, validation, security, or data-integrity expectations may change pilot scope",
+      "classification": "unknown",
+      "mitigation": "Identify appropriate reviewers and applicable requirements before testing"
+    }
+  ],
+  "assumptions": ["A candidate instrument and workflow can be selected for discovery; availability is not confirmed."],
+  "unknowns": [
+    "Which instrument, model, and workflow should be selected?",
+    "Which electronic recording environment and interface are in scope?",
+    "What quality, validation, security, and data-integrity requirements apply?",
+    "Who is the sponsor and who can authorize a pilot?",
+    "What baseline and thresholds would make the pilot useful?"
+  ],
+  "options": [
+    {
+      "name": "Continue discovery",
+      "description": "Confirm workflow, owners, interfaces, requirements, and a measurable pilot boundary.",
+      "classification": "recommendation"
+    },
+    {
+      "name": "Defer the concept",
+      "description": "Pause until a sponsor, workflow, and technical path can be confirmed.",
+      "classification": "option"
+    }
+  ],
+  "recommended_option": "Continue discovery before any pilot commitment.",
+  "recommended_next_step": "Run a short discovery with laboratory, quality, IT, and data-governance stakeholders to select one instrument and workflow, verify interface options, and agree pilot acceptance criteria.",
+  "pilot_definition": "If discovery supports it, propose a bounded pilot using one instrument, one QC1 characterization workflow, and one end-to-end data path. Confirm authorization, quality requirements, access, and success criteria before execution.",
+  "evidence_ledger": [],
+  "brand_brief": {
+    "project_name": "QC1 Connected Instrument Pilot",
+    "tagline": "Test one instrument. Trace one data path.",
+    "tone": "Clear, measured, evidence-led",
+    "palette": {
+      "primary": "#176B54",
+      "ink": "#1E2A27",
+      "paper": "#FFFEFA",
+      "accent": "#C9A766"
+    },
+    "typography": "System sans-serif; strong readable headings; no corporate marks",
+    "logo_rationale": "A simple, independent path-and-point motif suggests a traceable data journey without implying an approved product or corporate affiliation.",
+    "accessibility": "Use high-contrast text, labels in addition to color, and a recognizable silhouette at small sizes."
+  },
+  "approval_status": {
+    "status": "pending",
+    "approved_at": null,
+    "approved_version": null
+  },
+  "change_log": [
+    {
+      "at": "2026-10-23T12:00:00.000Z",
+      "event": "qc1_demo_seeded"
+    }
+  ]
+}

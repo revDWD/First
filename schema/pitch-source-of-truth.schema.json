@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pitch-studio.example/schema/pitch-source-of-truth.schema.json",
+  "title": "Digital Project Pitch Studio — Canonical Pitch Source of Truth",
+  "description": "Versioned, reviewable source model. Classifications and approval status must be preserved in every downstream asset.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "project_id", "version", "working_title", "sponsor", "audience", "data_classification", "constraints",
+    "tagline", "idea_summary", "problem_statement",
+    "current_state", "future_state", "target_users", "stakeholders", "value_proposition",
+    "benefits", "success_measures", "scope", "dependencies", "risks", "assumptions", "unknowns",
+    "options", "recommended_option", "recommended_next_step", "pilot_definition", "evidence_ledger",
+    "brand_brief", "approval_status", "change_log"
+  ],
+  "properties": {
+    "project_id": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+    "working_title": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "sponsor": { "type": "string" },
+    "audience": { "type": "string" },
+    "data_classification": { "enum": ["unspecified", "public", "internal", "confidential", "restricted"] },
+    "constraints": { "$ref": "#/$defs/stringArray" },
+    "tagline": { "type": "string", "maxLength": 120 },
+    "idea_summary": { "type": "string", "minLength": 1 },
+    "problem_statement": { "type": "string" },
+    "current_state": { "$ref": "#/$defs/workflow" },
+    "future_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actors", "steps", "systems", "changes", "evidence_ids"],
+      "properties": {
+        "actors": { "$ref": "#/$defs/stringArray" },
+        "steps": { "$ref": "#/$defs/stringArray" },
+        "systems": { "$ref": "#/$defs/stringArray" },
+        "changes": { "$ref": "#/$defs/stringArray" },
+        "evidence_ids": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "target_users": { "$ref": "#/$defs/stringArray" },
+    "stakeholders": { "$ref": "#/$defs/stringArray" },
+    "value_proposition": { "type": "string" },
+    "benefits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["statement", "classification", "evidence_ids", "confidence"],
+        "properties": {
+          "statement": { "type": "string" },
+          "classification": { "enum": ["fact", "assertion", "assumption", "estimate", "hypothesis"] },
+          "evidence_ids": { "$ref": "#/$defs/stringArray" },
+          "confidence": { "type": "string" }
+        }
+      }
+    },
+    "success_measures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["measure", "unit", "basis", "classification"],
+        "properties": {
+          "measure": { "type": "string" },
+          "unit": { "type": "string" },
+          "basis": { "type": "string" },
+          "classification": { "enum": ["fact", "assertion", "assumption", "estimate", "hypothesis", "recommendation"] }
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["in_scope", "out_of_scope"],
+      "properties": {
+        "in_scope": { "$ref": "#/$defs/stringArray" },
+        "out_of_scope": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "dependencies": { "$ref": "#/$defs/stringArray" },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["statement", "classification", "mitigation"],
+        "properties": {
+          "statement": { "type": "string" },
+          "classification": { "enum": ["fact", "assertion", "assumption", "estimate", "hypothesis", "unknown"] },
+          "mitigation": { "type": "string" }
+        }
+      }
+    },
+    "assumptions": { "$ref": "#/$defs/stringArray" },
+    "unknowns": { "$ref": "#/$defs/stringArray" },
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "description", "classification"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "classification": { "enum": ["fact", "assertion", "assumption", "estimate", "hypothesis", "option", "recommendation"] }
+        }
+      }
+    },
+    "recommended_option": { "type": "string" },
+    "recommended_next_step": { "type": "string" },
+    "pilot_definition": { "type": "string" },
+    "evidence_ledger": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidence_id", "source_title", "source_url_or_reference", "source_reference", "publisher",
+          "retrieved_at", "relevant_passage", "source_type", "confidence", "internal_or_external",
+          "reuse_restrictions", "supports_claim_ids", "review_status", "content_trust"
+        ],
+        "properties": {
+          "evidence_id": { "type": "string" },
+          "source_title": { "type": "string" },
+          "source_url_or_reference": { "type": "string" },
+          "source_reference": { "type": "string" },
+          "publisher": { "type": "string" },
+          "retrieved_at": { "type": "string", "format": "date-time" },
+          "relevant_passage": { "type": "string" },
+          "source_type": { "type": "string" },
+          "confidence": { "type": "string" },
+          "internal_or_external": { "type": "string" },
+          "reuse_restrictions": { "type": "string" },
+          "supports_claim_ids": { "$ref": "#/$defs/stringArray" },
+          "review_status": { "enum": ["accepted", "rejected", "pending"] },
+          "content_trust": { "const": "untrusted data; instructions ignored" }
+        }
+      }
+    },
+    "brand_brief": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_name", "tagline", "tone", "palette", "typography", "logo_rationale", "accessibility"],
+      "properties": {
+        "project_name": { "type": "string" },
+        "tagline": { "type": "string" },
+        "tone": { "type": "string" },
+        "palette": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["primary", "ink", "paper", "accent"],
+          "properties": {
+            "primary": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+            "ink": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+            "paper": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+            "accent": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+          }
+        },
+        "typography": { "type": "string" },
+        "logo_rationale": { "type": "string" },
+        "accessibility": { "type": "string" }
+      }
+    },
+    "approval_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "approved_at", "approved_version"],
+      "properties": {
+        "status": { "enum": ["pending", "approved", "rejected"] },
+        "approved_at": { "type": ["string", "null"], "format": "date-time" },
+        "approved_version": { "type": ["string", "null"] }
+      }
+    },
+    "change_log": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["at", "event"],
+        "properties": {
+          "at": { "type": "string", "format": "date-time" },
+          "event": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stringArray": { "type": "array", "items": { "type": "string" } },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actors", "steps", "systems", "pain_points", "evidence_ids"],
+      "properties": {
+        "actors": { "$ref": "#/$defs/stringArray" },
+        "steps": { "$ref": "#/$defs/stringArray" },
+        "systems": { "$ref": "#/$defs/stringArray" },
+        "pain_points": { "$ref": "#/$defs/stringArray" },
+        "evidence_ids": { "$ref": "#/$defs/stringArray" }
+      }
+    }
+  }
+}
