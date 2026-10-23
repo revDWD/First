@@ -4,7 +4,7 @@ A local-first, dependency-free prototype for turning an early digital project id
 
 **Live demo:** [Open Digital Project Pitch Studio on GitHub Pages](https://gitddyck.github.io/First/)
 
-The repository is configured to publish the static app with GitHub Actions. If the link is not live yet, enable **Settings → Pages → Build and deployment → Source: GitHub Actions** and run the **Deploy GitHub Pages** workflow from the `main` branch. The expected URL is `https://gitddyck.github.io/First/`.
+The repository is configured to publish the static app with GitHub Actions. GitHub Pages must be enabled by a repository administrator at **Settings → Pages → Build and deployment → Source: GitHub Actions**; the workflow cannot enable this repository setting itself. The earlier Pages run failed before uploading a site because the Pages configuration API was unavailable to the workflow. The workflow now requests the read-only Pages permission and runs a post-deployment URL smoke test. If the link is still unavailable, an administrator must enable Pages and rerun **Deploy GitHub Pages** from `main`. The expected URL is `https://gitddyck.github.io/First/`.
 
 ## Run locally (Windows)
 
@@ -20,18 +20,19 @@ The repository is configured to publish the static app with GitHub Actions. If t
 2. Select **Load QC1 demo**, or enter a title and idea.
 3. Review source passages in **Evidence** if needed. Only `.txt`, `.md`, and `.json` files up to 1 MB are accepted; they are read in the browser and are not uploaded.
 4. Edit and approve the canonical pitch model in **Review**.
-5. Generate, inspect, and export the package. The ZIP contains the dossier, one-pager, slide outline, infographic, light/dark logo SVGs, rationale, video script/storyboard/captions, canonical JSON, and a provenance manifest.
+5. Generate, inspect, and export the package. The ZIP contains the editable PowerPoint deck and design profile, dossier, one-pager, accessible slide outline, infographic, light/dark logo SVGs, rationale, video script/storyboard/captions, canonical JSON, and a provenance manifest.
 
 Data is saved in this browser profile's local storage. Avoid entering confidential or restricted information. Use **Clear this device's project data** to remove the prototype's local storage entry; this does not erase browser backups or exported files.
 
 ## Browser smoke tests
 
-With the static server running, open `http://localhost:8080/tests/browser-smoke.html` and select **Run smoke tests**. The dependency-free harness exercises approval gating, canonical record output, consistency checks, ZIP contents/checksum manifest, exact 60-second timing, and invalidation after edits. It clears its test project from local storage at the end.
+With the static server running, open `http://localhost:8080/tests/browser-smoke.html` and select **Run smoke tests**. The dependency-free harness exercises QC1 approval gating, canonical record output, editable PowerPoint package structure and slide bounds, consistency checks, ZIP contents/checksum manifest, exact 60-second timing, and invalidation after edits. It clears its test project from local storage at the end. The Pages workflow runs `tests/deployment-smoke.sh` after a successful deploy to verify the hosted shell and assets, QC1 example, and browser harness are reachable.
 
 ## Deliverables and design
 
 - [Product requirements](docs/PRD.md)
 - [Architecture, workflow diagram, state model, agent contracts, and system structure](docs/ARCHITECTURE.md)
+- [PowerPoint reference analysis, derived design profile, and output choices](docs/PRESENTATION-DESIGN.md)
 - [Threat model](docs/THREAT-MODEL.md)
 - [MCP allowlisting design](docs/MCP-ALLOWLIST.md)
 - [UX wireframes](docs/UX-WIREFRAMES.md)
@@ -46,6 +47,7 @@ With the static server running, open `http://localhost:8080/tests/browser-smoke.
 - Evidence passages are user-reviewed source material, not independently verified facts. Imported instructions are never executed.
 - Pitch-model approval is not authorization to execute, fund, validate, or publish a project.
 - The current ZIP includes a deterministic 60-second storyboard/script/caption package, not a rendered MP4 or recorded narration. No image provider is configured.
+- The PowerPoint output is an editable seven-slide draft generated from the approved model, not a flattened screenshot deck. Corporate reference artwork is not copied; the theme uses a text-only Bayer word label. Review visual fit in desktop PowerPoint before presenting.
 - The local document intake is the only evidence connector. MCP, enterprise repositories, authentication, shared storage, encryption policy, retention/deletion service, and audit backend are design requirements for a reviewed deployment, not implemented capabilities.
 - The consistency audit checks exact shared fields and approved-version provenance. It does not independently prove semantic fact consistency.
 

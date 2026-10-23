@@ -24,6 +24,7 @@
       const STORAGE_KEY = "pitch-studio-project-v1";
       const results = document.getElementById("results");
       const frame = document.getElementById("app-frame");
+      const normalizeText = (value) => String(value).replace(/\s+/g, " ").trim();
       const check = (condition, name) => {
         const item = document.createElement("li");
         item.className = condition ? "pass" : "fail";
@@ -73,6 +74,7 @@
           const appWindow = frame.contentWindow;
           appWindow.confirm = () => true;
 
+          check(Boolean(appWindow.PitchPresentation), "presentation renderer loads before the app");
           click(app, "#load-demo");
           check(app.querySelector("#stage-review").classList.contains("active"), "QC1 demo opens at canonical model review");
           click(app, '.step[data-stage="evidence"]');
@@ -95,14 +97,26 @@
           click(app, '.step[data-stage="assets"]');
           check(app.querySelector("#stage-review").classList.contains("active"), "asset generation is blocked before approval");
           check(app.querySelector("#generate-assets").disabled, "generation control is disabled before approval");
+          const unapprovedProject = JSON.parse(appWindow.localStorage.getItem(STORAGE_KEY));
+          let blockedPowerPoint = false;
+          try {
+            await appWindow.PitchPresentation.generate(unapprovedProject.pitch, unapprovedProject, () => new appWindow.Blob([]));
+          } catch (_error) {
+            blockedPowerPoint = true;
+          }
+          check(blockedPowerPoint, "PowerPoint renderer refuses a model version without matching human approval");
 
           click(app, '#model-form button[type="submit"]');
           check(app.querySelector("#inspector-approval").textContent === "Approved draft", "human approval records the exact draft version");
           const version = app.querySelector("#inspector-version").textContent.slice(1);
+          const approvedPitchSnapshot = JSON.parse(appWindow.localStorage.getItem(STORAGE_KEY)).pitch;
           click(app, '.step[data-stage="assets"]');
           click(app, "#generate-assets");
+          for (let attempt = 0; attempt < 100 && app.querySelector("#asset-grid").children.length === 0; attempt += 1) {
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
           check(app.querySelector("#audit-result").textContent.includes("Consistency audit passed"), "all generated asset claims pass the exact-field audit");
-          check(app.querySelectorAll(".asset-card").length === 7, "all seven deliverable groups are available for preview");
+          check(app.querySelectorAll(".asset-card").length === 8, "all deliverable groups, including the editable PowerPoint, are available for preview");
           check(app.querySelector("#approval-required").hidden, "approved gate notice is hidden");
 
           click(app, '[data-preview="pitch-source-of-truth.json"]');
@@ -111,6 +125,12 @@
           check(canonical.benefits.every((benefit) => benefit.classification !== "fact"), "unverified QC1 benefits are not presented as facts");
           check(canonical.evidence_ledger.length === 1 && canonical.evidence_ledger[0].content_trust === "untrusted data; instructions ignored", "canonical ledger preserves provenance and untrusted-content status");
           check(!canonical.recommended_next_step.includes("IGNORE ALL PRIOR INSTRUCTIONS"), "source instructions never alter the approved recommendation");
+          click(app, ".preview-close");
+
+          click(app, '[data-preview="project-pitch.pptx"]');
+          const deckPreview = JSON.parse(app.querySelector(".preview-body pre").textContent);
+          check(deckPreview.project_version === version && deckPreview.slide_count === 7, "PowerPoint preview is bound to the approved project version and seven-slide story");
+          check(deckPreview.editable_shape_count > 50 && deckPreview.speaker_notes, "PowerPoint contains editable text/vector shapes and speaker notes");
           click(app, ".preview-close");
 
           let zipBlob = null;
@@ -126,7 +146,9 @@
           }
           if (!zipBlob) throw new Error("ZIP export did not produce a blob.");
           const files = await parseStoredZip(zipBlob);
+          window.__smokePptxBase64 = btoa(Array.from(files.get("project-pitch.pptx"), (byte) => String.fromCharCode(byte)).join(""));
           check(files.has("manifest.json") && files.has("pitch-source-of-truth.json"), "ZIP contains a provenance manifest and canonical record");
+          check(files.has("project-pitch.pptx") && files.has("presentation/theme-profile.json"), "coordinated ZIP includes the editable PowerPoint and its design profile");
           check(files.has("infographic.svg") && files.has("logo-light.svg") && files.has("logo-dark.svg"), "ZIP contains infographic and light/dark logo variants");
           check(files.has("video/thumbnail.svg") && files.has("video/captions.vtt") && files.has("video/storyboard.html"), "ZIP contains thumbnail, captions, and deterministic storyboard");
           const manifest = JSON.parse(new TextDecoder().decode(files.get("video/render-manifest.json")));
@@ -141,6 +163,54 @@
             if (provenance.asset_checksums_sha256[name] !== actual) hashesMatch = false;
           }
           check(hashesMatch, "manifest SHA-256 values match the exported asset bytes");
+          check(provenance.project_version === version && provenance.source_model_version === version, "export manifest binds all outputs to the approved canonical version");
+
+          const deckFiles = await parseStoredZip(new appWindow.Blob([files.get("project-pitch.pptx")]));
+          const slideNames = [...deckFiles.keys()].filter((name) => /^ppt\/slides\/slide\d+\.xml$/.test(name));
+          const noteNames = [...deckFiles.keys()].filter((name) => /^ppt\/notesSlides\/notesSlide\d+\.xml$/.test(name));
+          check(slideNames.length === 7 && noteNames.length === 7, "PowerPoint is a complete OOXML deck with one speaker-notes part per slide");
+          check(deckFiles.has("[Content_Types].xml") && deckFiles.has("ppt/presentation.xml") && deckFiles.has("ppt/theme/theme1.xml"), "PowerPoint package includes the presentation manifest, presentation, and editable theme");
+          const decoder = new TextDecoder();
+          const slideXml = slideNames.map((name) => decoder.decode(deckFiles.get(name))).join("\n");
+          const noteXml = noteNames.map((name) => decoder.decode(deckFiles.get(name))).join("\n");
+          const theme = JSON.parse(decoder.decode(files.get("presentation/theme-profile.json")));
+          const xmlParser = new appWindow.DOMParser();
+          check((slideXml.match(/<p:sp>/g) || []).length > 50 && !slideXml.includes("<p:pic>"), "presentation uses native editable shapes and text rather than slide screenshots");
+          check(slideXml.includes("BAYER") && slideXml.includes("PROJECT PITCH DRAFT") && slideXml.includes("NOT AN APPROVAL"), "slides include the wordmark treatment, draft boundary, and approval disclaimer");
+          const slideDocumentText = normalizeText(slideNames.map((name) => {
+            const document = xmlParser.parseFromString(decoder.decode(deckFiles.get(name)), "application/xml");
+            return [...document.getElementsByTagNameNS("http://schemas.openxmlformats.org/drawingml/2006/main", "t")]
+              .map((node) => node.textContent)
+              .join(" ");
+          }).join(" "));
+          check(slideDocumentText.includes(normalizeText(canonical.recommended_next_step))
+            && slideDocumentText.includes(normalizeText(canonical.pilot_definition)), "PowerPoint decision and pilot text match the approved canonical record");
+          check(noteXml.includes("reviewed-source.md") && noteXml.includes("not independently verified"), "speaker notes preserve source provenance and its verification boundary");
+          check(theme.profile_id === "bayer-reference-narrative-v1" && theme.page.aspect_ratio === "16:9", "exported theme profile matches the reference-derived widescreen design system");
+          let validSlideXml = true;
+          let inBounds = true;
+          for (const name of slideNames) {
+            const document = xmlParser.parseFromString(decoder.decode(deckFiles.get(name)), "application/xml");
+            if (document.getElementsByTagName("parsererror").length) validSlideXml = false;
+            for (const shape of document.getElementsByTagNameNS("http://schemas.openxmlformats.org/presentationml/2006/main", "sp")) {
+              const transform = shape.getElementsByTagNameNS("http://schemas.openxmlformats.org/drawingml/2006/main", "xfrm")[0];
+              const offset = transform?.getElementsByTagNameNS("http://schemas.openxmlformats.org/drawingml/2006/main", "off")[0];
+              const extent = transform?.getElementsByTagNameNS("http://schemas.openxmlformats.org/drawingml/2006/main", "ext")[0];
+              if (!offset || !extent) {
+                inBounds = false;
+                continue;
+              }
+              const x = Number(offset.getAttribute("x"));
+              const y = Number(offset.getAttribute("y"));
+              const width = Number(extent.getAttribute("cx"));
+              const height = Number(extent.getAttribute("cy"));
+              if (x < 0 || y < 0 || width <= 0 || height <= 0 || x + width > 12192000 || y + height > 6858000) inBounds = false;
+            }
+          }
+          check(validSlideXml, "all PowerPoint slide parts are well-formed XML");
+          check(inBounds, "all editable slide shapes fit within 16:9 slide bounds");
+          const projectAfterGeneration = JSON.parse(appWindow.localStorage.getItem(STORAGE_KEY));
+          check(projectAfterGeneration.version === version && JSON.stringify(projectAfterGeneration.pitch) === JSON.stringify(approvedPitchSnapshot), "PowerPoint generation does not mutate the approved canonical project record");
 
           click(app, '.step[data-stage="review"]');
           const title = app.querySelector("#model-title");
@@ -167,6 +237,9 @@
           click(app, '#model-form button[type="submit"]');
           click(app, '.step[data-stage="assets"]');
           click(app, "#generate-assets");
+          for (let attempt = 0; attempt < 100 && app.querySelector("#asset-grid").children.length === 0; attempt += 1) {
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
           click(app, '[data-preview="dossier.md"]');
           const safeDossier = app.querySelector(".preview-body pre").textContent;
           check(safeDossier.includes("&lt;script&gt;") && !safeDossier.includes("<script>"), "generated Markdown escapes user-supplied HTML");

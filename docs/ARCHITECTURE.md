@@ -12,7 +12,7 @@ flowchart LR
   D --> E[Pitch synthesis<br/>deterministic proposal]
   E --> F{Human approval<br/>approve exact version}
   F -->|edit / reject| E
-  F -->|approved| G[Parallel templates<br/>dossier · one-pager · deck]
+  F -->|approved exact version| G[Parallel templates<br/>dossier · one-pager · editable PPTX]
   F -->|approved| H[Visual templates<br/>infographic · logo]
   F -->|approved| I[Video template<br/>60-sec scenes · captions]
   G --> J[Consistency audit]
@@ -24,6 +24,8 @@ flowchart LR
 ```
 
 The research-plan node is represented by the visible unknowns and proposed source-intake screen; no external research is executed. The work graph is deterministic UI state and functions, not an LLM-driven agent graph.
+
+`presentation.js` is a deterministic renderer that receives the approved canonical pitch and version envelope. It selects a concise seven-slide narrative, applies the separate `presentation/theme-profile.json` token profile, and creates native PowerPoint text/shapes plus source-aware speaker notes. It cannot revise or persist the canonical model. The `.pptx` binary is included in the ZIP manifest and verified against the approved version; the text slide outline remains as an accessible fallback.
 
 ## State machine
 
@@ -88,6 +90,9 @@ First/
 ├── index.html                         # Local-first accessible application shell
 ├── styles.css                         # Responsive UI; no runtime style dependency
 ├── app.js                              # Intake, state, templates, audit, ZIP export
+├── presentation.js                     # Approved-version OOXML PowerPoint renderer
+├── presentation/
+│   └── theme-profile.json              # Reference-derived editable slide design tokens
 ├── schema/
 │   └── pitch-source-of-truth.schema.json
 ├── examples/
@@ -98,7 +103,8 @@ First/
 │   ├── THREAT-MODEL.md
 │   ├── MCP-ALLOWLIST.md
 │   ├── UX-WIREFRAMES.md
-│   └── ROADMAP.md
+│   ├── ROADMAP.md
+│   └── PRESENTATION-DESIGN.md          # Reference analysis and output decisions
 ├── .env.example                        # Reserved deployment configuration; no secrets
 └── README.md                           # Setup and operating limits
 ```

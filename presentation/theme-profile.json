@@ -1,0 +1,73 @@
+{
+  "profile_id": "bayer-reference-narrative-v1",
+  "status": "Reference-derived; corporate logo artwork is intentionally not copied",
+  "source_decks": [
+    "bayer_master_templates.pptx",
+    "A_Document_Automation_Odyssey 4.pptx",
+    "Digital Byte Streamdeck 10.5.pptx",
+    "IBT Tablet Enabled Template Slides.pptx"
+  ],
+  "slide": {
+    "width_inches": 13.333333,
+    "height_inches": 7.5,
+    "orientation": "landscape",
+    "aspect_ratio": "16:9"
+  },
+  "colors": {
+    "navy": "#10384F",
+    "cyan": "#00BCFF",
+    "green": "#004422",
+    "lime": "#89D329",
+    "purple": "#443247",
+    "magenta": "#D30F4B",
+    "pink": "#FF3162",
+    "orange": "#FBAE40",
+    "white": "#FFFFFF",
+    "ink": "#1F2933",
+    "muted": "#62727C",
+    "surface": "#F4F7F8",
+    "rule": "#D9E2E7"
+  },
+  "typography": {
+    "reference_family": "Arial",
+    "title_pt": 34,
+    "section_pt": 12,
+    "body_pt": 21,
+    "supporting_pt": 15,
+    "footer_pt": 9,
+    "hierarchy": "Short section label, large declarative title, one dominant message, restrained supporting text"
+  },
+  "spacing_inches": {
+    "left": 0.78,
+    "right": 0.72,
+    "top": 0.42,
+    "footer_baseline": 7.14,
+    "content_top": 1.75,
+    "content_bottom": 6.66
+  },
+  "branding": {
+    "organization_wordmark": "BAYER",
+    "wordmark_treatment": "Editable typographic label with a cyan rule; no corporate logo image embedded",
+    "classification_source": "Canonical intake data_classification",
+    "draft_label": "PROJECT PITCH · DRAFT · NOT AN APPROVAL",
+    "footer": "Classification, project version, draft status, and slide number"
+  },
+  "layout_library": [
+    "title-metaphor",
+    "friction-statement",
+    "current-future-workflow",
+    "evidence-value",
+    "pilot-measurement",
+    "risks-and-unknowns",
+    "decision-ink"
+  ],
+  "narrative_rules": [
+    "Select a small set of layouts from the approved model rather than restyling per generated slide.",
+    "Lead with the message and use visual sequence or contrast instead of dense bullet lists.",
+    "Use editable PowerPoint text and vector shapes; do not flatten slides to images.",
+    "Preserve attribution, claim classification, uncertainty, recommendation, and pilot boundary.",
+    "Keep a small discussion/live-annotation area on the decision slide."
+  ],
+  "image_policy": "Use only when present in approved project assets and license/rights are reviewed. The MVP deck uses editable vector diagrams and no stock or generated images.",
+  "template_asset_policy": "The reference files inform this profile but are not bundled, redistributed, or copied into the public demo."
+}
