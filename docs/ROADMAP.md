@@ -8,9 +8,13 @@
 - [x] Local text/Markdown/JSON evidence connector with human accept/reject.
 - [x] Current-version human approval gate; edit revokes approval.
 - [x] Dossier, one-pager, nine-slide outline, infographic, logo concepts, video story/script/captions, canonical JSON.
+- [x] Seven-slide editable PowerPoint with an approved, reference-derived theme profile, speaker/source notes, draft/classification footer, and annotation-ready decision layout.
 - [x] Exact-field consistency audit and local ZIP with SHA-256 manifest.
+- [x] Post-deployment Pages smoke test for the application shell, runtime assets, QC1 fixture, and browser harness.
 - [x] Local-first disclosure, no remote services, no dependency installation.
 - [x] Dependency-free browser smoke-test harness for approval, output consistency, ZIP contents, timing, checksums, and edit invalidation.
+- [ ] Enable GitHub Pages for Actions in repository settings and confirm the published URL from the post-deploy smoke test.
+- [ ] Open the QC1 `.pptx` in desktop PowerPoint and visually inspect representative slides, notes, typography, and long-content autofit.
 - [ ] Validate in the target enterprise browser before demonstration.
 - [ ] Optional file download checksums / package extraction verification in target browsers.
 - [ ] Accessibility review with keyboard, screen reader, contrast, and zoom evaluation.
@@ -22,7 +26,7 @@
 - Full schema validation at API boundary; immutable version snapshots and append-only approval records.
 - Source critic for authority, freshness, claim mapping, contradiction, reuse restrictions, and confidence basis.
 - Human-readable unsupported-claim and contradiction screens; evidence citations in each asset.
-- Dossier/PDF and PPTX generation; accessible slide and document templates.
+- DOCX dossier and one-pager, then XLSX evidence/assumptions register, with reviewed Office templates and automated open/validation tests.
 - Approved image/logo provider adapter, data-class routing, generated-image metadata, rights review, and image safety.
 - Remotion rendering service for deterministic scenes, licensed still assets, approved narration, captions, MP4, and output checksums.
 - Background queue, retry/cost limits, tracing, secret management, security and dependency scans.

@@ -16,6 +16,7 @@
     pendingFileName: "",
     assets: null,
     activeAsset: "",
+    generating: false,
     toastTimer: 0
   };
   const byId = (id) => document.getElementById(id);
@@ -496,7 +497,7 @@
     approvalBadge.textContent = project.approval.status === "approved" ? `Approved · v${project.approval.approved_version}` : "Not approved";
     approvalBadge.classList.toggle("approved", project.approval.status === "approved");
     byId("approval-required").hidden = project.approval.status === "approved";
-    byId("generate-assets").disabled = project.approval.status !== "approved";
+    byId("generate-assets").disabled = state.generating || project.approval.status !== "approved";
     byId("generate-assets").title = project.approval.status === "approved" ? "" : "Approve the source model first";
     byId("export-bar").hidden = !state.assets;
     byId("asset-grid").innerHTML = state.assets ? renderAssetCards() : "";
@@ -728,7 +729,7 @@
     }).join("\n");
   }
 
-  function generatedAssets() {
+  async function generatedAssets() {
     const pitch = state.project.pitch;
     const scenes = slideDeck(pitch);
     const deckMarkdown = `# ${escapeMarkdown(pitch.working_title)} — 9-slide outline\n\n${scenes.map((slide, index) => `## ${index + 1}. ${escapeMarkdown(slide.title)}\n\n${escapeMarkdown(slide.point)}\n\n*${escapeMarkdown(slide.note)}*`).join("\n\n")}\n`;
@@ -740,7 +741,7 @@
       brand_name: pitch.brand_brief.project_name,
       tagline: pitch.brand_brief.tagline
     };
-    return {
+    const assets = {
       "dossier.md": { mime: "text/markdown", content: dossierMarkdown(pitch), claims },
       "one-pager.md": { mime: "text/markdown", content: onePagerMarkdown(pitch), claims },
       "slide-deck.md": { mime: "text/markdown", content: deckMarkdown, claims },
@@ -756,13 +757,32 @@
       "video/render-manifest.json": { mime: "application/json", content: JSON.stringify({ project_name: pitch.working_title, tagline: pitch.brand_brief.tagline, recommended_next_step: pitch.recommended_next_step, pilot_definition: pitch.pilot_definition, objective: "Tell the same proposal story and decision request as the approved model", duration_seconds: 60, scene_count: scenes.length, renderer: "deterministic-html-storyboard", mp4_generated: false, audio_generated: false, image_generation_provider: null, thumbnail: "thumbnail.svg", captions: "captions.vtt", scene_durations_seconds: scenes.map((_scene, index) => sceneDuration(index)) }, null, 2), claims },
       "pitch-source-of-truth.json": { mime: "application/json", content: JSON.stringify(record, null, 2), claims }
     };
+    const presentation = await PitchPresentation.generate(pitch, state.project, zipStore);
+    assets["project-pitch.pptx"] = {
+      mime: presentation.mime,
+      content: presentation.content,
+      previewContent: JSON.stringify({
+        title: presentation.title,
+        project_version: presentation.version,
+        slide_count: presentation.slideCount,
+        slide_titles: presentation.slideTitles,
+        editable_shape_count: presentation.editableShapeCount,
+        speaker_notes: presentation.hasSpeakerNotes,
+        format: "Office Open XML PowerPoint (.pptx)",
+        design_profile: presentation.profile.profile_id
+      }, null, 2),
+      auditText: presentation.auditText,
+      claims
+    };
+    return assets;
   }
 
   function renderAssetCards() {
     const cards = [
       ["dossier.md", "Executive dossier", "Evidence-aware narrative with scope, risks, unknowns, and decision request.", "▤"],
       ["one-pager.md", "One-page brief", "A concise sponsor-facing overview of the same proposal.", "▱"],
-      ["slide-deck.md", "9-slide presentation", "A visual-first slide outline with a consistent narrative arc.", "▦"],
+      ["project-pitch.pptx", "Editable PowerPoint deck", "Seven narrative-selected layouts with editable text, shapes, source notes, and an annotation-ready decision slide.", "▦"],
+      ["slide-deck.md", "Presentation outline", "A text outline retained as an accessible fallback.", "▤"],
       ["infographic.svg", "Pitch infographic", "Current state → pilot → learning → decision request.", "◫"],
       ["logo-light.svg", "Logo concepts", "Light and dark identity concepts, rationale, and accessibility notes.", "✳"],
       ["video/storyboard.html", "60-second video package", "Timed scenes, script, storyboard preview, captions, and render manifest.", "▷"],
@@ -808,9 +828,14 @@
         } catch (error) {
           issues.push(`${name}: canonical JSON is invalid (${error.message}).`);
         }
-      } else {
+      } else if (asset.auditText) {
         for (const [label, value] of requiredText) {
-          if (!asset.content.includes(value) && !asset.content.includes(escapeHtml(value)) && !asset.content.includes(escapeMarkdown(value))) {
+          if (!asset.auditText.includes(value)) issues.push(`${name}: rendered ${label} is missing or differs from the approved model.`);
+        }
+      } else {
+        const content = typeof asset.content === "string" ? asset.content : "";
+        for (const [label, value] of requiredText) {
+          if (!content.includes(value) && !content.includes(escapeHtml(value)) && !content.includes(escapeMarkdown(value))) {
             issues.push(`${name}: rendered ${label} is missing or differs from the approved model.`);
           }
         }
@@ -828,17 +853,32 @@
     return issues.length === 0;
   }
 
-  function generatePackage() {
-    if (state.project.approval.status !== "approved") {
+  async function generatePackage() {
+    if (state.generating || state.project.approval.status !== "approved" || state.project.approval.approved_version !== state.project.version) {
       showToast("Approval is required before asset generation.");
       return;
     }
-    const assets = generatedAssets();
-    state.assets = auditAssets(assets) ? assets : null;
-    state.project.change_log.push({ at: isoNow(), event: state.assets ? "assets_generated_from_approved_model" : "consistency_audit_failed" });
-    persist();
-    render();
-    if (state.assets) showToast("Coordinated package generated. Review before sharing.");
+    const approvedVersion = state.project.version;
+    state.generating = true;
+    renderInspector();
+    try {
+      const assets = await generatedAssets();
+      if (state.project.version !== approvedVersion
+        || state.project.approval.status !== "approved"
+        || state.project.approval.approved_version !== approvedVersion) {
+        throw new Error("The approved project changed during generation. Re-approve the current version and try again.");
+      }
+      state.assets = auditAssets(assets) ? assets : null;
+      state.project.change_log.push({ at: isoNow(), event: state.assets ? "assets_generated_from_approved_model" : "consistency_audit_failed" });
+      persist();
+      if (state.assets) showToast("Coordinated package generated. Review before sharing.");
+    } catch (error) {
+      state.assets = null;
+      showToast(`Pitch package generation failed: ${error.message}`);
+    } finally {
+      state.generating = false;
+      render();
+    }
   }
 
   function previewAsset(key) {
@@ -871,6 +911,11 @@
       iframe.title = `${key} preview`;
       iframe.srcdoc = asset.content;
       body.append(iframe);
+    } else if (key.endsWith(".pptx")) {
+      const pre = document.createElement("pre");
+      pre.className = "asset-preview";
+      pre.textContent = asset.previewContent || "PowerPoint preview details are unavailable.";
+      body.append(pre);
     } else {
       const pre = document.createElement("pre");
       pre.className = "asset-preview";
@@ -966,9 +1011,10 @@
     return new Blob([...localParts, ...centralParts, end], { type: "application/zip" });
   }
 
-  async function sha256(text) {
+  async function sha256(content) {
     if (!globalThis.crypto?.subtle) throw new Error("This browser does not expose Web Crypto SHA-256. Open the app in a modern browser or use a local static web server.");
-    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    const bytes = typeof content === "string" ? new TextEncoder().encode(content) : content;
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
     return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
   }
 
@@ -979,7 +1025,11 @@
     }
     try {
       const files = {};
+      if (state.project.approval.status !== "approved" || state.project.approval.approved_version !== state.project.version) {
+        throw new Error("The package no longer matches the currently approved project version.");
+      }
       for (const [path, asset] of Object.entries(state.assets)) files[path] = asset.content;
+      files["presentation/theme-profile.json"] = JSON.stringify(PitchPresentation.profile, null, 2);
       const checksums = {};
       for (const [path, content] of Object.entries(files)) checksums[path] = await sha256(content);
       const manifest = {

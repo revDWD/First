@@ -16,6 +16,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
     steps:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -25,12 +28,13 @@ jobs:
 
       - name: Assemble static site
         run: |
-          mkdir -p _site/docs _site/schema _site/examples _site/tests
-          cp index.html styles.css app.js README.md _site/
+          mkdir -p _site/docs _site/schema _site/examples _site/tests _site/presentation
+          cp index.html styles.css app.js presentation.js README.md _site/
           cp -R docs/. _site/docs/
           cp -R schema/. _site/schema/
           cp -R examples/. _site/examples/
           cp -R tests/. _site/tests/
+          cp presentation/theme-profile.json _site/presentation/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
@@ -50,3 +54,11 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+
+      - name: Check out smoke test
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Verify deployed site
+        env:
+          PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+        run: bash tests/deployment-smoke.sh "$PAGES_URL"
